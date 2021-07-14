@@ -1,9 +1,11 @@
-import { time } from "console";
-import { ClientRequest, IncomingMessage } from "http";
 import { request, RequestOptions } from "https";
 
 class net {
-  async sendApiReq(api:string, body:Buffer, method:string = "POST", auth?:string):Promise<string> {
+  async sendApiReq(api:string, body:Buffer = Buffer.from(""), method:string = "GET", auth?:string):Promise<string> {
+    if (body == null) body = Buffer.from("");
+    if (method == null) method = "GET";
+    if (auth == null) auth = undefined;
+
     let headers = {
       "User-Agent": "Mozilla/5.0 (Linux) Gecko/20100101 Firefox/89.0",
       "Accept": "*/*",

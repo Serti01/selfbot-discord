@@ -1,39 +1,41 @@
+import { exit } from "process";
 import { net } from "./discord/discord"
 import { parser } from "./parse/parser"
 
-let botconfig:string[] = parser.confToJson("bot/bot.conf");
-let TOKEN:string;
+let botConfig: string[] = parser.confToJson("bot/bot.conf");
+let TOKEN: string;
+let userData = {};
 
-function login() {
-  if (botconfig["LOGINUSER"] != null && botconfig["LOGINPASSWORD"] != null) {
-    let netr:Promise<string> = net.sendApiReq("auth/login", Buffer.from(JSON.stringify({
-      login:botconfig["LOGINUSER"],
-      password:botconfig["LOGINPASSWORD"],
-      undelete:false,
-      captcha_key:null,
-      login_source:null,
-      gift_code_sku_id:null,
-    })));
-    let data;
-    netr.then((v) => {
-      data = JSON.parse(v.toString());
-      TOKEN = data["token"];
-    });
-  } else if (botconfig["TOKEN"] != null) {
-    let netr:Promise<string> = net.sendApiReq("users/@me", Buffer.from(""), "GET", botconfig["TOKEN"]);
-    let data;
-    netr.then((v) => {
-      data = JSON.parse(v.toString());
-      if (data["id"] != undefined && data["username"] != undefined && data["discriminator"] != undefined) {
-        TOKEN = botconfig["token"];
-      }
-      console.log(data);
-    })
+async function login() {
+  if (botConfig["LOGINUSER"] != null && botConfig["LOGINPASSWORD"] != null) {
+    let data = JSON.parse((await net.sendApiReq("auth/login", Buffer.from(JSON.stringify({
+      login: botConfig["LOGINUSER"],
+      password: botConfig["LOGINPASSWORD"],
+      undelete: false,
+      captcha_key: null,
+      login_source: null,
+      gift_code_sku_id: null
+    })),"POST")).toString());
+    TOKEN = data["token"];
+  } else if (botConfig["TOKEN"] != null) {
+    let b = await net.sendApiReq("users/@me",null,null,botConfig["TOKEN"]);
+    let data = JSON.parse(b.toString());
+    if (data["message"] != "401: Unauthorized") {
+      TOKEN = botConfig["TOKEN"];
+    }
   } else {
-    // no way to get the token was given, ask.
+    console.log("No token or method to get token was given. Edit bot/bot.conf");
+    exit(1);
   }
 
-  console.log("TOKEN",TOKEN);
+  let data = JSON.parse((await (await net.sendApiReq("users/@me", Buffer.from(""), "GET", TOKEN)).toString()));
+  userData = data;
+
+  return data;
 }
 
-export { login };
+function bot() {
+
+}
+
+export {login, bot};
