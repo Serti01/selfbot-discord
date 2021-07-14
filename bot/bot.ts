@@ -1,5 +1,5 @@
 import { exit } from "process";
-import { net } from "./discord/discord"
+import { net,scrapeToken } from "./discord/discord"
 import { parser } from "./parse/parser"
 
 let botConfig: string[] = parser.confToJson("bot/bot.conf");
@@ -7,7 +7,12 @@ let TOKEN: string;
 let userData = {};
 
 async function login() {
-  if (botConfig["LOGINUSER"] != null && botConfig["LOGINPASSWORD"] != null) {
+  if (botConfig["SCRAPETOKEN"] == true) {
+    let s:string = scrapeToken();
+    if (s == null){
+      console.log("Token couldn't be scraped.");
+    }
+  } if (botConfig["LOGINUSER"] != null && botConfig["LOGINPASSWORD"] != null && !TOKEN) {
     let data = JSON.parse((await net.sendApiReq("auth/login", Buffer.from(JSON.stringify({
       login: botConfig["LOGINUSER"],
       password: botConfig["LOGINPASSWORD"],
@@ -24,7 +29,7 @@ async function login() {
       TOKEN = botConfig["TOKEN"];
     }
   } else {
-    console.log("No token or method to get token was given. Edit bot/bot.conf");
+    console.log("No token/method to get token was given. Edit bot/bot.conf");
     exit(1);
   }
 

