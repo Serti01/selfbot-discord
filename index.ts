@@ -1,3 +1,4 @@
+import { exit } from "process";
 import * as bot from "./bot/bot";
 
 bot.login().then((data) => {

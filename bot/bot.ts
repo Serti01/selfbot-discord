@@ -1,6 +1,8 @@
 import { exit } from "process";
 import { net,scrapeToken } from "./discord/discord"
 import { parser } from "./parse/parser"
+import { deflateSync } from "zlib"
+import * as ws from "ws"
 
 let botConfig: string[] = parser.confToJson("bot/bot.conf");
 let TOKEN: string;
@@ -29,7 +31,7 @@ async function login() {
       TOKEN = botConfig["TOKEN"];
     }
   } else {
-    console.log("No token/method to get token was given. Edit bot/bot.conf");
+    console.log("No token or method to get token was given or worked. Edit bot/bot.conf");
     exit(1);
   }
 
@@ -40,7 +42,8 @@ async function login() {
 }
 
 function bot() {
-
+  // MAKE THIS WORK
+  let sock = ws("wss://gateway.discord.gg/?encoding=json&v=9&compress=zlib-stream")
 }
 
 export {login, bot};

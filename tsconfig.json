@@ -2,6 +2,8 @@
   "compileOnSave": true,
   "compilerOptions": {
     "resolveJsonModule": true,
-    "moduleResolution": "Node"
-  }
+    "moduleResolution": "Node",
+    "pretty":true
+  },
+  "files": ["index.ts","bot/bot.ts","bot/discord/discord.ts","bot/parse/parser.ts"],
 }
