@@ -25,17 +25,25 @@ class parser {
     let conf:string[] = this.readConf(file);
     
     let json = [];
+    let jsons = "{";
 
     for (let i = 0, entry = conf[i]; i < conf.length; i++, entry = conf[i]) {
       let data = entry.split(/=/,2);
       
       try {
-        json.push(JSON.parse(`{"${data[0]}":${data[1]}}`));
+        jsons += `"${data[0]}":${data[1]},`;
+        //json.push(JSON.parse(`{"${data[0]}":${data[1]}}`));
       } catch (e) {
         console.log(e);
       }
     }
-
+    
+    //use json as a tmp variable here
+    json = jsons.split('');
+    json[json.length-1] = "}";
+    jsons = json.join('');
+    json = JSON.parse(jsons);
+    
     return json;
   }
 }
