@@ -15,19 +15,20 @@ async function login() {
       console.log("Token couldn't be scraped.");
     }
   } if (botConfig["LOGINUSER"] != null && botConfig["LOGINPASSWORD"] != null && !TOKEN) {
-    let data = JSON.parse((await net.sendApiReq("auth/login", Buffer.from(JSON.stringify({
+    let res = await net.sendApiReq("auth/login", Buffer.from(JSON.stringify({
       login: botConfig["LOGINUSER"],
       password: botConfig["LOGINPASSWORD"],
       undelete: false,
       captcha_key: null,
       login_source: null,
       gift_code_sku_id: null
-    })),"POST")).toString());
+    })),"POST");
+
+    let data = JSON.parse(res.content.toString());
     TOKEN = data["token"];
   } else if (botConfig["TOKEN"] != null) {
-    let b = await net.sendApiReq("users/@me",null,null,botConfig["TOKEN"]);
-    let data = JSON.parse(b.toString());
-    if (data["message"] != "401: Unauthorized") {
+    let res = await net.sendApiReq("users/@me",null,null,botConfig["TOKEN"]);
+    if (res.status.code != 401) {
       TOKEN = botConfig["TOKEN"];
     }
   } else {
@@ -35,7 +36,8 @@ async function login() {
     exit(1);
   }
 
-  let data = JSON.parse((await (await net.sendApiReq("users/@me", Buffer.from(""), "GET", TOKEN)).toString()));
+  let res = await net.sendApiReq("user/@me",null,null,TOKEN);
+  let data = JSON.parse(res.content.toString());
   userData = data;
 
   return data;

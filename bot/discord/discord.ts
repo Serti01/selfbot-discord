@@ -4,7 +4,7 @@ import { env } from "process";
 import { readdirSync,readFileSync } from "fs";
 
 class net {
-  async sendApiReq(api:string, body:Buffer = Buffer.from(""), method:string = "GET", auth?:string):Promise<string> {
+  async sendApiReq(api:string, body:Buffer = Buffer.from(""), method:string = "GET", auth?:string):Promise<{status:{code:number,message:string},content:Buffer}> {
     if (body == null) body = Buffer.from("");
     if (method == null) method = "GET";
     if (auth == null) auth = undefined;
@@ -26,11 +26,11 @@ class net {
       "path": `/api/v9/${api}`
     };
 
-    return new Promise<string>((pres,prej) => {
+    return new Promise<{status:{code:number,message:string},content:Buffer}>((pres,prej) => {
       let req = request(options, res => {
         res.on("data", async (d) => {
           (await (async function() {return new Promise<void>((res,rej)=>{setTimeout(()=>{res()},1000)})})());
-          pres(d);
+          pres({status:{code:res.statusCode,message:res.statusMessage},content:d});
         });
       });
 
