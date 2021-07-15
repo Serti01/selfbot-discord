@@ -3,7 +3,8 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "moduleResolution": "Node",
-    "pretty":true
+    "pretty":true,
+    "target":"ES5"
   },
   "files": ["index.ts","bot/bot.ts","bot/discord/discord.ts","bot/parse/parser.ts"],
 }

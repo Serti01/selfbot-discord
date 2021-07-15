@@ -4,6 +4,8 @@ import { env } from "process";
 import { readdirSync,readFileSync } from "fs";
 
 class net {
+  heartbeatc:number = 0;
+
   async sendApiReq(api:string, body:Buffer = Buffer.from(""), method:string = "GET", auth?:string):Promise<{status:{code:number,message:string},content:Buffer}> {
     if (body == null) body = Buffer.from("");
     if (method == null) method = "GET";
@@ -41,6 +43,14 @@ class net {
       req.write(body);
       req.end();
     });
+  }
+  async heartbeatws(ws, heartbeat): Promise<void> {
+    setInterval(() => {
+      ws.send(JSON.stringify({op:1, d:this.heartbeatc}))
+    },heartbeat);
+  }
+  updateheartbeatc(_new:number) {
+    this.heartbeatc = _new;
   }
 }
 
