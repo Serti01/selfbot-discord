@@ -25,14 +25,20 @@ class net {
       "method": method,
       "port": 443,
       "hostname":"discord.com",
-      "path": `/api/v9/${api}`
+      "path": encodeURI(`/api/v9/${api}`)
     };
 
     return new Promise<{status:{code:number,message:string},content:Buffer}>((pres,prej) => {
       let req = request(options, res => {
-        res.on("data", async (d) => {
-          (await (async function() {return new Promise<void>((res,rej)=>{setTimeout(()=>{res()},1000)})})());
-          pres({status:{code:res.statusCode,message:res.statusMessage},content:d});
+        let chunks:Buffer[] = [];
+        
+        res.on("data", async (d:Buffer) => {
+          chunks.push(d);
+        });
+
+        res.on("end", () => {
+          let all:Buffer = Buffer.from(chunks.join(""));
+          pres({status:{code:res.statusCode,message:res.statusMessage},content:all});
         });
       });
 
@@ -44,10 +50,10 @@ class net {
       req.end();
     });
   }
-  async heartbeatws(ws, heartbeat): Promise<void> {
-    setInterval(() => {
+  async heartbeatws(sock, heartbeat): Promise<void> {
+    setInterval((ws) => {
       ws.send(JSON.stringify({op:1, d:this.heartbeatc}))
-    },heartbeat);
+    },heartbeat,sock);
   }
   updateheartbeatc(_new:number) {
     this.heartbeatc = _new;
