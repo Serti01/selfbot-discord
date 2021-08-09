@@ -4,7 +4,7 @@
     "resolveJsonModule": true,
     "moduleResolution": "Node",
     "pretty":true,
-    "target":"ES5"
+    "target":"ES2015"    
   },
   "files": ["index.ts","bot/bot.ts","bot/discord/discord.ts","bot/parse/parser.ts"],
 }
