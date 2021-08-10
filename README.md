@@ -2,6 +2,5 @@
 
 A lovely little selfbot, with as little dependencies as possible.
 
-## Current depenedencies
-- *@types/node*
-- *ws*
+## Current dependencies
+- SFML
