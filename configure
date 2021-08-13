@@ -1,0 +1,19 @@
+#! /usr/bin/sh
+
+if test -e $(which cmake)
+then
+    echo "Cmake available"
+else
+    echo "ERROR -- Vendor \"evpp\" requires cmake for compilation."
+    exit 1
+fi
+
+if test -e $(which gcc)
+then
+    echo "GCC available"
+else
+    echo "ERROR -- GCC required for compilation."
+    exit 1
+fi
+
+git clone https://github.com/Qihoo360/evpp.git vendor/evpp

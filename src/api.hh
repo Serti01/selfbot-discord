@@ -1,6 +1,8 @@
 #pragma once
 
-#include <SFML/Network.hpp>
+#include "../vendor/include/curlpp/cURLpp.hpp"
+#include "../vendor/include/curlpp/Easy.hpp"
+#include "../vendor/include/curlpp/Options.hpp"
 #include "../vendor/json.hpp"
 
 using nlohmann::json;
@@ -9,16 +11,16 @@ namespace bot {
     namespace discord {
         class api {
             private:
-            sf::Http::Response wrapper(sf::Http::Request req);
 
             public:
+            enum method{
+                GET,
+                POST,
+                DELETE,
+            };
             std::string token;
-            sf::Http::Response GET(const std::string uri = "/", const std::string body = "");
-            sf::Http::Response POST(const std::string uri = "/", const std::string body = "");
-            sf::Http::Response DELETE(const std::string uri = "/", const std::string body = "");
-            sf::Http::Response GET(const std::string uri = "/", json json = {});
-            sf::Http::Response POST(const std::string uri = "/", json json = {});
-            sf::Http::Response DELETE(const std::string uri = "/", json json = {});
+
+            json send(const std::string uri = "", bot::discord::api::method method = GET, json body = NULL);
 
             api();
             ~api();

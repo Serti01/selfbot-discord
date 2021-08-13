@@ -1,3 +1,6 @@
 #! /usr/bin/sh
 
-g++ -o bot src/*.cc -lsfml-network -lsfml-system
+mkdir dist -p
+
+g++ $@ -Ivendor/include/ -o dist/bot src/*.cc -Lvendor/lib/curlpp -lcurl -lcurlpp -Wl,-rpath='$ORIGIN'
+cp vendor/lib/**/*.so* dist
