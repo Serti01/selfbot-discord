@@ -3,4 +3,5 @@
 A lovely little selfbot, with as little dependencies as possible.
 
 ## Current dependencies
-- SFML
+- libcurl
+- libcurlpp (included)
