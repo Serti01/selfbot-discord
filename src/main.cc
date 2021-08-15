@@ -11,7 +11,7 @@ int main() {
 
     net.token = getenv("TOKEN");
 
-    // TODO: Communicate with discord websocket
+    set_net(&net);
     std::thread wsock(init);
     wsock.detach();
     

@@ -1,10 +1,15 @@
 #pragma once
 
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <sstream>
 #include "../vendor/include/curlpp/cURLpp.hpp"
 #include "../vendor/include/curlpp/Easy.hpp"
 #include "../vendor/include/curlpp/Options.hpp"
 #include "../vendor/include/curlpp/Infos.hpp"
-#include "main.hh"
+#include "../vendor/json.hpp"
+using nlohmann::json;
 
 namespace bot {
     class net {
