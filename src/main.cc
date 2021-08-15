@@ -1,16 +1,25 @@
 #include "main.hh"
-#include "curlpp/cURLpp.hpp"
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
+
+bool ended = false;
 
 int main() {
     curlpp::initialize();
-    bot::discord::api api;
-    api.token = secure_getenv("DISCORD_TOKEN");
-    std::cout << "\nSending /v9/users/@me\n" << std::endl;
-    json test = api.send("users/@me");
-    std::cout << "\n A \n";
-    std::cout << test.dump(2) << std::endl;
+    bot::net net;
+
+    if (getenv("TOKEN") == NULL)
+        exit(1);
+
+    net.token = getenv("TOKEN");
+
+    // TODO: Communicate with discord websocket
+    std::thread wsock(init);
+    wsock.detach();
+    
+    while (!get_started())
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    while (!ended)
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
     curlpp::terminate();
 }

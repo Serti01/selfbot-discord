@@ -1,72 +1,29 @@
 #include "api.hh"
-#include "curlpp/Exception.hpp"
-#include "curlpp/Options.hpp"
-#include "curlpp/Types.hpp"
-#include "curlpp/cURLpp.hpp"
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
-#include <string>
-#include <unistd.h>
-
-
-// sf::Http::Response bot::discord::api::GET(const std::string uri, const std::string body) {
-//     sf::Http::Request req("/api/v9/"+uri,sf::Http::Request::Method::Get, body);
-//     req.setField("Content-Type", "application/x-www-form-urlencoded");
-//     return wrapper(req);
-// }
-// sf::Http::Response bot::discord::api::POST(const std::string uri, const std::string body) {
-//     sf::Http::Request req("/api/v9/"+uri,sf::Http::Request::Method::Post, body);
-//     req.setField("Content-Type", "application/x-www-form-urlencoded");
-//     return wrapper(req);
-// }
-// sf::Http::Response bot::discord::api::DELETE(const std::string uri, const std::string body) {
-//     sf::Http::Request req("/api/v9/"+uri, sf::Http::Request::Method::Delete, body);
-//     req.setField("Content-Type", "application/x-www-form-urlencoded");
-//     return wrapper(req);
-// };
-// sf::Http::Response bot::discord::api::GET(const std::string uri, json json) {
-//     sf::Http::Request req("/api/v9/"+uri,sf::Http::Request::Method::Get, json.get<std::string>());
-//     req.setField("Content-Type", "application/json");
-//     return wrapper(req);
-// }
-// sf::Http::Response bot::discord::api::POST(const std::string uri, json json) {
-//     sf::Http::Request req("/api/v9/"+uri,sf::Http::Request::Method::Post, json.get<std::string>());
-//     req.setField("Content-Type", "application/json");
-//     return wrapper(req);
-// }
-// sf::Http::Response bot::discord::api::DELETE(const std::string uri, json json) {
-//     sf::Http::Request req("/api/v9/"+uri,sf::Http::Request::Method::Delete, json.get<std::string>());
-//     req.setField("Content-Type", "application/json");
-//     return wrapper(req);
-// }
-
-// sf::Http::Response bot::discord::api::wrapper(sf::Http::Request req) {
-//     sf::Http http;
-//     http.setHost("discord.com");
-    
-
-
-//     sf::Http::Response res = http.sendRequest(req, sf::seconds(15));
-//     if (res.getStatus() != res.Ok || res.getStatus() != res.NoContent) {
-//         std::printf("Api request failed with %i\n", res.getStatus());
-//     }
-
-//     return res;
-// };
-
 
 namespace {
-    char *data = NULL;
+    std::string data;
+    char *dataBuffer = NULL;
+    size_t m_size = 0;
 
-    size_t readData(char *buffer, size_t size, size_t nitems)
-    {
-        strncpy(buffer, data, size * nitems);
-        return size * nitems;
+    size_t writeFunc(char *ptr, size_t size, size_t nmemb){
+        size_t realsize = size * nmemb;
+
+        if (ptr)
+            dataBuffer = (char*)realloc(ptr,m_size+realsize);
+        else
+            dataBuffer = (char*)malloc(m_size+realsize);
+
+        if (dataBuffer == NULL)
+            realsize = 0;
+
+        memcpy(&(dataBuffer[m_size]), ptr, realsize);
+        m_size += realsize;
+
+        return realsize;
     }
-}
+};
 
-json bot::discord::api::send(const std::string uri, bot::discord::api::method method, json body) {
+json bot::net::discord(const std::string uri, std::string method, json body) {
     using namespace curlpp::options;
     
     try {
@@ -79,15 +36,34 @@ json bot::discord::api::send(const std::string uri, bot::discord::api::method me
         headers.push_back("Authorization: "+this->token);
         headers.push_back("DNT: 1");
         headers.push_back("Content-Type: application/json");
-    
+
+        req.setOpt<CustomRequest>(method);
+
+        std::cout << "-" << body << "-" << std::endl;
+
+        if (body != "")
+        {
+            headers.push_back("Content-Length: "+std::to_string(body.dump().length()));
+            req.setOpt(new InfileSize(body.dump().length()));
+            req.setOpt(new Upload(true));
+        }
+
         req.setOpt<Verbose>(false);
-        req.setOpt<ReadFunction>(curlpp::types::ReadFunctionFunctor(readData));
         req.setOpt<HttpHeader>(headers);
+        req.setOpt<ReadFunction>([body](char *buffer, size_t size, size_t nitems){
+            strncpy(buffer, body.dump().c_str(), size * nitems);
+            return size * nitems;
+        });
         req.setOpt<Url>("https://discord.com/api/v9/"+uri);
 
-        req.perform();
-    
-        return data;
+        std::stringstream ss;
+        ss << req;
+
+        long status = curlpp::Infos::ResponseCode::get(req);
+        if (status)
+            printf("API (%s) error %lu", uri.c_str(), status);
+
+        return json::parse(ss.str());
     }
     catch(curlpp::RuntimeError &e) {
         std::cerr << e.what() << std::endl;
@@ -99,9 +75,9 @@ json bot::discord::api::send(const std::string uri, bot::discord::api::method me
     return NULL;
 }
 
-bot::discord::api::api() {
+bot::net::net() {
 
 }
-bot::discord::api::~api() {
+bot::net::~net() {
 
 }
