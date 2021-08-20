@@ -17,7 +17,7 @@ typedef wspp::client<wspp::config::asio_tls_client> client;
 
 void set_net(bot::net *_api);
 void init();
-void send(json msg);
+void send(wspp::connection_hdl hdl, json msg);
 int get_count();
 client *get_c();
 bool get_started();
